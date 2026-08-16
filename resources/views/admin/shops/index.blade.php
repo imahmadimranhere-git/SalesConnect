@@ -18,6 +18,7 @@
                     <th>Area</th>
                     <th>Location</th>
                     <th>Status</th>
+                    <th>Login</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -27,6 +28,8 @@
                         <td>{{ $shop->name }}</td>
                         <td>{{ $shop->owner_name }}</td>
                         <td>{{ $shop->area }}</td>
+                        <td>
+    
                         <td>
                             <a href="https://www.google.com/maps?q={{ $shop->latitude }},{{ $shop->longitude }}" target="_blank" class="text-decoration-none">
                                 <i class="bi bi-geo-alt"></i> View on Map

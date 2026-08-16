@@ -10,7 +10,6 @@ use App\Http\Controllers\SuperAdmin\SettingController;
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DistributorController;
-use App\Http\Controllers\Admin\ShopkeeperController;
 use App\Http\Controllers\Admin\ShopController;
 
 
@@ -56,13 +55,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('distributors/{distributor}/reset-password', [DistributorController::class, 'resetPassword'])->name('distributors.reset-password');
     Route::patch('distributors/{distributor}/toggle-status', [DistributorController::class, 'toggleStatus'])->name('distributors.toggle-status');
     
-    Route::resource('shopkeepers', ShopkeeperController::class);
-    Route::patch('shopkeepers/{shopkeeper}/reset-password', [ShopkeeperController::class, 'resetPassword'])->name('shopkeepers.reset-password');
-    Route::patch('shopkeepers/{shopkeeper}/toggle-status', [ShopkeeperController::class, 'toggleStatus'])->name('shopkeepers.toggle-status');
-
     Route::resource('shops', ShopController::class)->except(['show']);
     Route::patch('shops/{shop}/toggle-status', [ShopController::class, 'toggleStatus'])->name('shops.toggle-status');
-    });
+    Route::post('shops/{shop}/add-login', [ShopController::class, 'addLogin'])->name('shops.add-login');
+    Route::patch('shops/{shop}/reset-password', [ShopController::class, 'resetPassword'])->name('shops.reset-password');
+
+    
+
+    }
    
 
 /*

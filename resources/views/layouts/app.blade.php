@@ -155,11 +155,8 @@
             <i class="bi bi-truck"></i> Distributors
         </a>
     </li>
-    <li class="nav-item">
-    <a href="{{ route('admin.shopkeepers.index') }}" class="nav-link {{ request()->routeIs('admin.shopkeepers.*') ? 'active' : '' }}">
-        <i class="bi bi-shop"></i> Shopkeepers
-    </a>
-</li>
+    
+
 <li class="nav-item">
     <a href="{{ route('admin.shops.index') }}" class="nav-link {{ request()->routeIs('admin.shops.*') ? 'active' : '' }}">
         <i class="bi bi-geo-alt"></i> Shops

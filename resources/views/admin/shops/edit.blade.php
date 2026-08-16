@@ -44,8 +44,52 @@
             @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
+
+        <div class="mb-3 p-3 bg-light rounded">
+    <label class="form-label fw-semibold">Shopkeeper Login</label>
+
+    @if ($shop->shopkeeper)
+        <div class="small text-muted mb-2">
+            Email: <strong>{{ $shop->shopkeeper->email }}</strong> —
+            Status:
+            <span class="badge {{ $shop->shopkeeper->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
+                {{ ucfirst($shop->shopkeeper->status) }}
+            </span>
+        </div>
+
+        <form action="{{ route('admin.shops.reset-password', $shop) }}" method="POST" onsubmit="return confirm('Generate a new password for this login?')">
+            @csrf
+            @method('PATCH')
+            <button type="submit" class="btn btn-sm btn-warning">
+                <i class="bi bi-key"></i> Reset Password
+            </button>
+        </form>
+    @else
+        <div class="small text-muted mb-2">This shop does not have a login yet.</div>
+
+        <form action="{{ route('admin.shops.add-login', $shop) }}" method="POST" class="d-flex gap-2 flex-wrap">
+            @csrf
+            <div class="input-group" style="max-width: 350px;">
+                <input type="text" name="email_prefix" class="form-control form-control-sm" placeholder="e.g. karachi-store1">
+                <span class="input-group-text">@salesconnect.com</span>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">Create Login</button>
+        </form>
+    @endif
+</div>
+
         <div class="mb-3">
-            <label class="form-label">Shop Location (click on the map to update the pin)</label>
+            <label class="form-label">Shop Location</label>
+
+            <button type="button" id="useCurrentLocation" class="btn btn-outline-primary btn-sm mb-2">
+                <i class="bi bi-crosshair"></i> Use My Current Location
+            </button>
+            <span id="locationLoading" class="text-muted small ms-2" style="display: none;">
+                <i class="bi bi-hourglass-split"></i> Getting your location...
+            </span>
+
+            <div class="text-muted small mb-2">Or click anywhere on the map to update the pin manually.</div>
+
             <div id="map" style="height: 350px; border-radius: 6px;"></div>
 
             <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $shop->latitude) }}">
@@ -80,6 +124,54 @@
         document.getElementById('longitude').value = lng.toFixed(7);
         document.getElementById('coordsDisplay').innerText =
             'Selected: ' + lat.toFixed(6) + ', ' + lng.toFixed(6);
+    });
+
+    document.getElementById('useCurrentLocation').addEventListener('click', function () {
+        const loadingText = document.getElementById('locationLoading');
+
+        if (!navigator.geolocation) {
+            alert('Geolocation is not supported by your browser.');
+            return;
+        }
+
+        loadingText.style.display = 'inline';
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                const newLatLng = { lat: lat, lng: lng };
+
+                marker.setLatLng(newLatLng);
+                map.setView(newLatLng, 17);
+
+                document.getElementById('latitude').value = lat.toFixed(7);
+                document.getElementById('longitude').value = lng.toFixed(7);
+                document.getElementById('coordsDisplay').innerText =
+                    'Selected (GPS): ' + lat.toFixed(6) + ', ' + lng.toFixed(6) +
+                    ' (accuracy: ' + Math.round(position.coords.accuracy) + 'm)';
+
+                loadingText.style.display = 'none';
+            },
+            function (error) {
+                loadingText.style.display = 'none';
+
+                let message = 'Could not get your location. ';
+                if (error.code === error.PERMISSION_DENIED) {
+                    message += 'Please allow location access in your browser.';
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    message += 'Location information is unavailable.';
+                } else {
+                    message += 'Please try again.';
+                }
+                alert(message);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+            }
+        );
     });
 </script>
 @endsection
