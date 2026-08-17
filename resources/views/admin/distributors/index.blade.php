@@ -35,6 +35,9 @@
                         <td>{{ $distributor->created_at->format('d M Y') }}</td>
                         <td>
                             <div class="d-flex gap-1 flex-wrap">
+                            <a href="{{ route('admin.distributors.assignments.index', $distributor) }}" class="btn btn-sm btn-info text-white">
+    <i class="bi bi-signpost-split"></i> Assign Shops
+</a>
                                 <a href="{{ route('admin.distributors.edit', $distributor) }}" class="btn btn-sm btn-primary">
                                     <i class="bi bi-pencil"></i> Edit
                                 </a>

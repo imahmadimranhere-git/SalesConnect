@@ -11,7 +11,14 @@ use App\Http\Controllers\SuperAdmin\SettingController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DistributorController;
 use App\Http\Controllers\Admin\ShopController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ShopAssignmentController;
+use App\Http\Controllers\Admin\VisitController;
 
+use App\Http\Controllers\Distributor\DashboardController as DistributorDashboardController;
+use App\Http\Controllers\Distributor\VisitController as DistributorVisitController;
+use App\Http\Controllers\Distributor\OrderController as DistributorOrderController;
 
 
 Route::get('/', function () {
@@ -42,11 +49,8 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
     });
 
-/*
-|--------------------------------------------------------------------------
-| Admin Panel Routes
-|--------------------------------------------------------------------------
-*/
+
+// Admin Panel Routes
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -60,9 +64,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('shops/{shop}/add-login', [ShopController::class, 'addLogin'])->name('shops.add-login');
     Route::patch('shops/{shop}/reset-password', [ShopController::class, 'resetPassword'])->name('shops.reset-password');
 
-    
+    Route::resource('products', ProductController::class);
+    Route::patch('products/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
 
-    }
+    Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::patch('orders/{order}/update-status', [OrderController::class, 'updateStatus'])->name('orders.update-status'); 
+    
+    Route::get('distributors/{distributor}/assignments', [ShopAssignmentController::class, 'index'])->name('distributors.assignments.index');
+    Route::post('distributors/{distributor}/assignments', [ShopAssignmentController::class, 'store'])->name('distributors.assignments.store');
+    Route::delete('assignments/{assignment}', [ShopAssignmentController::class, 'destroy'])->name('assignments.destroy');
+  
+    Route::get('visits', [VisitController::class, 'index'])->name('visits.index');
+    
+    Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    });
    
 
 /*
@@ -70,9 +85,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 | Distributor Panel Routes
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['auth', 'role:distributor'])->prefix('distributor')->name('distributor.')->group(function () {
-    Route::view('/dashboard', 'distributor.dashboard')->name('dashboard');
-});
+    Route::get('/dashboard', [DistributorDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('route-plan', [DistributorVisitController::class, 'routePlan'])->name('route-plan');
+    Route::post('visits', [DistributorVisitController::class, 'store'])->name('visits.store');
+
+    Route::resource('orders', DistributorOrderController::class)->only(['index', 'create', 'store', 'show']);
+    
+
+
+
+    });
 
 /*
 |--------------------------------------------------------------------------

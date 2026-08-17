@@ -36,4 +36,28 @@ class Shop extends Model
     {
         return $this->hasOne(User::class);
     }
+
+    /**
+     * Calculate the distance (in meters) between this shop's saved
+     * location and a given latitude/longitude, using the Haversine formula.
+     */
+    public function distanceInMetersFrom(float $latitude, float $longitude): float
+    {
+        $earthRadius = 6371000; // meters
+
+        $latFrom = deg2rad($this->latitude);
+        $lonFrom = deg2rad($this->longitude);
+        $latTo = deg2rad($latitude);
+        $lonTo = deg2rad($longitude);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $a = sin($latDelta / 2) ** 2 +
+             cos($latFrom) * cos($latTo) * sin($lonDelta / 2) ** 2;
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
+    }
 }

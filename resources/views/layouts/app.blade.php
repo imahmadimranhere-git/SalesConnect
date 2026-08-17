@@ -162,15 +162,47 @@
         <i class="bi bi-geo-alt"></i> Shops
     </a>
 </li>
+
+<li class="nav-item">
+    <a href="{{ route('admin.products.index') }}" class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+        <i class="bi bi-box-seam"></i> Products
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+        <i class="bi bi-bag-check"></i> Orders
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ route('admin.visits.index') }}" class="nav-link {{ request()->routeIs('admin.visits.*') ? 'active' : '' }}">
+        <i class="bi bi-geo-alt"></i> Visits
+    </a>
+</li>
+
 @endif
 
-            @if (auth()->user()->isDistributor())
-                <li class="nav-item">
-                    <a href="{{ route('distributor.dashboard') }}" class="nav-link {{ request()->routeIs('distributor.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                </li>
-            @endif
+           @if (auth()->user()->isDistributor())
+    <li class="nav-item">
+        <a href="{{ route('distributor.dashboard') }}" class="nav-link {{ request()->routeIs('distributor.dashboard') ? 'active' : '' }}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+
+   <li class="nav-item">
+    <a href="{{ route('distributor.route-plan') }}" class="nav-link {{ request()->routeIs('distributor.route-plan') ? 'active' : '' }}">
+        <i class="bi bi-signpost-split"></i> Route Plan
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ route('distributor.orders.index') }}" class="nav-link {{ request()->routeIs('distributor.orders.*') ? 'active' : '' }}">
+        <i class="bi bi-bag-check"></i> Orders
+    </a>
+</li>
+
+@endif
 
             @if (auth()->user()->isShopkeeper())
                 <li class="nav-item">

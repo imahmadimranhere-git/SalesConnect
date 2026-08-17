@@ -29,8 +29,6 @@
                         <td>{{ $shop->owner_name }}</td>
                         <td>{{ $shop->area }}</td>
                         <td>
-    
-                        <td>
                             <a href="https://www.google.com/maps?q={{ $shop->latitude }},{{ $shop->longitude }}" target="_blank" class="text-decoration-none">
                                 <i class="bi bi-geo-alt"></i> View on Map
                             </a>
@@ -39,6 +37,13 @@
                             <span class="badge {{ $shop->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
                                 {{ ucfirst($shop->status) }}
                             </span>
+                        </td>
+                        <td>
+                            @if ($shop->shopkeeper)
+                                <span class="badge bg-success bg-opacity-10 text-success">{{ $shop->shopkeeper->email }}</span>
+                            @else
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">No Login</span>
+                            @endif
                         </td>
                         <td>
                             <div class="d-flex gap-1 flex-wrap">
@@ -64,7 +69,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center">No shops found.</td>
+                        <td colspan="7" class="text-center">No shops found.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -34,7 +34,8 @@
             </div>
         </div>
 
-        <div class="col-12 col-sm-6 col-lg-4">
+      {{-- 
+<div class="col-12 col-sm-6 col-lg-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body d-flex align-items-center">
                     <div class="bg-info bg-opacity-10 text-info rounded p-3 me-3">
@@ -47,6 +48,7 @@
                 </div>
             </div>
         </div>
+--}}
 
         <div class="col-12 col-sm-6 col-lg-4">
             <div class="card shadow-sm border-0">
