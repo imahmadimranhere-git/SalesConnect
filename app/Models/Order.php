@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
-    use HasFactory, BelongsToCompany;
+    use HasFactory, BelongsToCompany, SoftDeletes;
 
     protected $fillable = [
         'company_id',
@@ -37,13 +38,13 @@ class Order extends Model
         return $this->belongsTo(User::class, 'distributor_id');
     }
 
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
-
-    public function company(): BelongsTo
-{
-    return $this->belongsTo(Company::class);
-}
 }

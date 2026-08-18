@@ -18,8 +18,7 @@
 
     <div class="row mb-3">
         <div class="col-6">
-            <strong>Shop:</strong> {{ $order->shop?->name }}<br>
-            <span class="text-muted small">{{ $order->shop?->address }}, {{ $order->shop?->area }}</span>
+            <strong>Distributor:</strong> {{ $order->distributor?->name ?? 'N/A' }}
         </div>
         <div class="col-6 text-end">
             <strong>Date:</strong> {{ $order->created_at->format('d M Y, h:i A') }}
@@ -53,26 +52,6 @@
         </tfoot>
     </table>
 
-    <div class="mt-4 pt-3 border-top">
-        @if ($order->status === 'pending')
-            <h6>Update Status</h6>
-            <form action="{{ route('distributor.orders.update-status', $order) }}" method="POST" class="d-flex gap-2" style="max-width: 300px;">
-                @csrf
-                @method('PATCH')
-                <select name="status" class="form-select form-select-sm">
-                    <option value="pending" selected>Pending</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                </select>
-                <button type="submit" class="btn btn-sm btn-primary">Update</button>
-            </form>
-        @else
-            <div class="text-muted small">
-                <i class="bi bi-lock"></i> This order has been finalized and cannot be changed further.
-            </div>
-        @endif
-    </div>
-
-    <a href="{{ route('distributor.orders.index') }}" class="btn btn-outline-secondary mt-3">Back to Orders</a>
+    <a href="{{ route('shopkeeper.orders.index') }}" class="btn btn-outline-secondary">Back to Orders</a>
 </div>
 @endsection

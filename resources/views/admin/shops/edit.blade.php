@@ -9,6 +9,7 @@
 <div class="bg-white p-4 rounded shadow-sm" style="max-width: 700px;">
     <h3>Edit Shop</h3>
 
+    {{-- ============ MAIN SHOP EDIT FORM ============ --}}
     <form action="{{ route('admin.shops.update', $shop) }}" method="POST" class="mt-4">
         @csrf
         @method('PUT')
@@ -44,40 +45,6 @@
             @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
         </div>
 
-
-        <div class="mb-3 p-3 bg-light rounded">
-    <label class="form-label fw-semibold">Shopkeeper Login</label>
-
-    @if ($shop->shopkeeper)
-        <div class="small text-muted mb-2">
-            Email: <strong>{{ $shop->shopkeeper->email }}</strong> —
-            Status:
-            <span class="badge {{ $shop->shopkeeper->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
-                {{ ucfirst($shop->shopkeeper->status) }}
-            </span>
-        </div>
-
-        <form action="{{ route('admin.shops.reset-password', $shop) }}" method="POST" onsubmit="return confirm('Generate a new password for this login?')">
-            @csrf
-            @method('PATCH')
-            <button type="submit" class="btn btn-sm btn-warning">
-                <i class="bi bi-key"></i> Reset Password
-            </button>
-        </form>
-    @else
-        <div class="small text-muted mb-2">This shop does not have a login yet.</div>
-
-        <form action="{{ route('admin.shops.add-login', $shop) }}" method="POST" class="d-flex gap-2 flex-wrap">
-            @csrf
-            <div class="input-group" style="max-width: 350px;">
-                <input type="text" name="email_prefix" class="form-control form-control-sm" placeholder="e.g. karachi-store1">
-                <span class="input-group-text">@salesconnect.com</span>
-            </div>
-            <button type="submit" class="btn btn-sm btn-primary">Create Login</button>
-        </form>
-    @endif
-</div>
-
         <div class="mb-3">
             <label class="form-label">Shop Location</label>
 
@@ -102,8 +69,44 @@
         <button type="submit" class="btn btn-primary">Update Shop</button>
         <a href="{{ route('admin.shops.index') }}" class="btn btn-outline-secondary">Cancel</a>
     </form>
+
+    {{-- ============ SHOPKEEPER LOGIN — ALAG, INDEPENDENT SECTION ============ --}}
+    <div class="mb-3 p-3 bg-light rounded mt-4">
+        <label class="form-label fw-semibold">Shopkeeper Login</label>
+
+        @if ($shop->shopkeeper)
+            <div class="small text-muted mb-2">
+                Email: <strong>{{ $shop->shopkeeper->email }}</strong> —
+                Status:
+                <span class="badge {{ $shop->shopkeeper->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
+                    {{ ucfirst($shop->shopkeeper->status) }}
+                </span>
+            </div>
+
+            <form action="{{ route('admin.shops.reset-password', $shop) }}" method="POST" onsubmit="return confirm('Generate a new password for this login?')">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="btn btn-sm btn-warning">
+                    <i class="bi bi-key"></i> Reset Password
+                </button>
+            </form>
+        @else
+            <div class="small text-muted mb-2">This shop does not have a login yet.</div>
+
+            <form action="{{ route('admin.shops.add-login', $shop) }}" method="POST" class="d-flex gap-2 flex-wrap">
+                @csrf
+                <div class="input-group" style="max-width: 350px;">
+                    <input type="text" name="email_prefix" class="form-control form-control-sm" placeholder="e.g. karachi-store1">
+                    <span class="input-group-text">@salesconnect.com</span>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">Create Login</button>
+            </form>
+        @endif
+    </div>
+
 </div>
 
+@push('scripts')
 <script>
     const initialLat = {{ $shop->latitude }};
     const initialLng = {{ $shop->longitude }};
@@ -140,7 +143,6 @@
             function (position) {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
-
                 const newLatLng = { lat: lat, lng: lng };
 
                 marker.setLatLng(newLatLng);
@@ -156,22 +158,11 @@
             },
             function (error) {
                 loadingText.style.display = 'none';
-
-                let message = 'Could not get your location. ';
-                if (error.code === error.PERMISSION_DENIED) {
-                    message += 'Please allow location access in your browser.';
-                } else if (error.code === error.POSITION_UNAVAILABLE) {
-                    message += 'Location information is unavailable.';
-                } else {
-                    message += 'Please try again.';
-                }
-                alert(message);
+                alert('Could not get your location. Please allow location access or click on the map.');
             },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-            }
+            { enableHighAccuracy: true, timeout: 10000 }
         );
     });
 </script>
+@endpush
 @endsection

@@ -15,14 +15,14 @@ use Illuminate\View\View;
 class OrderController extends Controller
 {
     public function index(): View
-{
-    $orders = Order::with(['shop', 'items.product'])
-        ->where('distributor_id', auth()->id())
-        ->orderBy('id', 'asc')
-        ->paginate(10);
+    {
+        $orders = Order::with(['shop', 'items.product'])
+            ->where('distributor_id', auth()->id())
+            ->orderBy('id', 'asc')
+            ->paginate(10);
 
-    return view('distributor.orders.index', compact('orders'));
-}
+        return view('distributor.orders.index', compact('orders'));
+    }
 
     public function create(): View
     {
@@ -77,11 +77,41 @@ class OrderController extends Controller
     }
 
     public function show(Order $order): View
+    {
+        abort_if($order->distributor_id !== auth()->id(), 403);
+
+        $order->load(['shop', 'items.product', 'company']);
+
+        return view('distributor.orders.show', compact('order'));
+    }
+
+   public function updateStatus(Request $request, Order $order): RedirectResponse
 {
     abort_if($order->distributor_id !== auth()->id(), 403);
 
-    $order->load(['shop', 'items.product', 'company']);
+    // Once an order is delivered or cancelled, it becomes final — no further changes allowed.
+    if (in_array($order->status, ['delivered', 'cancelled'])) {
+        return redirect()
+            ->route('distributor.orders.index')
+            ->with('error', 'This order is already finalized and cannot be changed.');
+    }
 
-    return view('distributor.orders.show', compact('order'));
+    $request->validate([
+        'status' => ['required', 'in:pending,delivered,cancelled'],
+    ]);
+
+    DB::transaction(function () use ($order, $request) {
+        $order->update(['status' => $request->status]);
+
+        if ($request->status === 'delivered') {
+            foreach ($order->items as $item) {
+                $item->product->decrement('stock_quantity', $item->quantity);
+            }
+        }
+    });
+
+    return redirect()
+        ->route('distributor.orders.index')
+        ->with('success', 'Order status updated successfully.');
 }
 }

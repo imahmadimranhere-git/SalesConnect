@@ -35,11 +35,28 @@
                             </span>
                         </td>
                         <td>{{ $order->created_at->format('d M Y') }}</td>
-                        <td>
-                            <a href="{{ route('distributor.orders.show', $order) }}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-eye"></i> View
-                            </a>
-                        </td>
+                       <td>
+    <div class="d-flex flex-column gap-2">
+        <a href="{{ route('distributor.orders.show', $order) }}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-eye"></i> View
+        </a>
+
+        @if ($order->status === 'pending')
+            <form action="{{ route('distributor.orders.update-status', $order) }}" method="POST" class="d-flex gap-1">
+                @csrf
+                @method('PATCH')
+                <select name="status" class="form-select form-select-sm" style="width: auto;">
+                    <option value="pending" selected>Pending</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+            </form>
+        @else
+            <span class="text-muted small"><i class="bi bi-lock"></i> Finalized</span>
+        @endif
+    </div>
+</td>
                     </tr>
                 @empty
                     <tr>

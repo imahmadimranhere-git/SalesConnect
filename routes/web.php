@@ -15,11 +15,21 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ShopAssignmentController;
 use App\Http\Controllers\Admin\VisitController;
+use App\Http\Controllers\Admin\ReportController;
 
 use App\Http\Controllers\Distributor\DashboardController as DistributorDashboardController;
 use App\Http\Controllers\Distributor\VisitController as DistributorVisitController;
 use App\Http\Controllers\Distributor\OrderController as DistributorOrderController;
+use App\Http\Controllers\Distributor\ShopController as DistributorShopController;
+use App\Http\Controllers\Distributor\ProductController as DistributorProductController;
+use App\Http\Controllers\Distributor\ProfileController as DistributorProfileController;
+use App\Http\Controllers\Distributor\ReportController as DistributorReportController;
 
+use App\Http\Controllers\Shopkeeper\DashboardController as ShopkeeperDashboardController;
+use App\Http\Controllers\Shopkeeper\ProductController as ShopkeeperProductController;
+use App\Http\Controllers\Shopkeeper\OrderController as ShopkeeperOrderController;
+use App\Http\Controllers\Shopkeeper\VisitController as ShopkeeperVisitController;
+use App\Http\Controllers\Shopkeeper\ProfileController as ShopkeeperProfileController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -49,8 +59,7 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
     });
 
-
-// Admin Panel Routes
+    // Admin Panel Routes
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -77,14 +86,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('visits', [VisitController::class, 'index'])->name('visits.index');
     
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+
+    Route::get('reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
+    Route::get('reports/visits', [ReportController::class, 'visits'])->name('reports.visits');
+    Route::get('reports/orders', [ReportController::class, 'orders'])->name('reports.orders');
+
+
     });
    
 
-/*
-|--------------------------------------------------------------------------
-| Distributor Panel Routes
-|--------------------------------------------------------------------------
-*/
+
+// Distributor Panel Routes
+
 
 Route::middleware(['auth', 'role:distributor'])->prefix('distributor')->name('distributor.')->group(function () {
     Route::get('/dashboard', [DistributorDashboardController::class, 'index'])->name('dashboard');
@@ -94,18 +107,30 @@ Route::middleware(['auth', 'role:distributor'])->prefix('distributor')->name('di
 
     Route::resource('orders', DistributorOrderController::class)->only(['index', 'create', 'store', 'show']);
     
+    Route::get('my-shops', [DistributorShopController::class, 'index'])->name('my-shops.index');
 
+    Route::get('products', [DistributorProductController::class, 'index'])->name('products.index');
 
+    Route::get('profile', [DistributorProfileController::class, 'show'])->name('profile.show');
 
+    Route::get('reports/sales', [DistributorReportController::class, 'sales'])->name('reports.sales');
+    Route::get('reports/visits', [DistributorReportController::class, 'visits'])->name('reports.visits');
+    Route::get('reports/orders', [DistributorReportController::class, 'orders'])->name('reports.orders');
+
+    Route::patch('orders/{order}/update-status', [DistributorOrderController::class, 'updateStatus'])->name('orders.update-status');
+    
     });
 
-/*
-|--------------------------------------------------------------------------
-| Shopkeeper Panel Routes
-|--------------------------------------------------------------------------
-*/
+// Shopkeeper Panel Routes
+
+
 Route::middleware(['auth', 'role:shopkeeper'])->prefix('shopkeeper')->name('shopkeeper.')->group(function () {
-    Route::view('/dashboard', 'shopkeeper.dashboard')->name('dashboard');
+    Route::get('/dashboard', [ShopkeeperDashboardController::class, 'index'])->name('dashboard');
+    Route::get('products', [ShopkeeperProductController::class, 'index'])->name('products.index');
+    Route::get('orders', [ShopkeeperOrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{order}', [ShopkeeperOrderController::class, 'show'])->name('orders.show');
+    Route::get('visits', [ShopkeeperVisitController::class, 'index'])->name('visits.index');
+    Route::get('profile', [ShopkeeperProfileController::class, 'show'])->name('profile.show');
 });
 
 require __DIR__.'/auth.php';

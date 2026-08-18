@@ -181,6 +181,12 @@
     </a>
 </li>
 
+<li class="nav-item">
+    <a href="{{ route('admin.reports.sales') }}" class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+        <i class="bi bi-graph-up"></i> Reports
+    </a>
+</li>
+
 @endif
 
            @if (auth()->user()->isDistributor())
@@ -189,28 +195,67 @@
             <i class="bi bi-speedometer2"></i> Dashboard
         </a>
     </li>
-
-   <li class="nav-item">
-    <a href="{{ route('distributor.route-plan') }}" class="nav-link {{ request()->routeIs('distributor.route-plan') ? 'active' : '' }}">
-        <i class="bi bi-signpost-split"></i> Route Plan
-    </a>
-</li>
+    <li class="nav-item">
+        <a href="{{ route('distributor.route-plan') }}" class="nav-link {{ request()->routeIs('distributor.route-plan') ? 'active' : '' }}">
+            <i class="bi bi-signpost-split"></i> Route Plan
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('distributor.my-shops.index') }}" class="nav-link {{ request()->routeIs('distributor.my-shops.*') ? 'active' : '' }}">
+            <i class="bi bi-shop"></i> My Shops
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('distributor.orders.index') }}" class="nav-link {{ request()->routeIs('distributor.orders.*') ? 'active' : '' }}">
+            <i class="bi bi-bag-check"></i> Orders
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('distributor.products.index') }}" class="nav-link {{ request()->routeIs('distributor.products.*') ? 'active' : '' }}">
+            <i class="bi bi-box-seam"></i> Products
+        </a>
+    </li>
 
 <li class="nav-item">
-    <a href="{{ route('distributor.orders.index') }}" class="nav-link {{ request()->routeIs('distributor.orders.*') ? 'active' : '' }}">
-        <i class="bi bi-bag-check"></i> Orders
+    <a href="{{ route('distributor.reports.sales') }}" class="nav-link {{ request()->routeIs('distributor.reports.*') ? 'active' : '' }}">
+        <i class="bi bi-graph-up"></i> Reports
     </a>
 </li>
 
+    <li class="nav-item">
+        <a href="{{ route('distributor.profile.show') }}" class="nav-link {{ request()->routeIs('distributor.profile.*') ? 'active' : '' }}">
+            <i class="bi bi-person"></i> Profile
+        </a>
+    </li>
 @endif
 
             @if (auth()->user()->isShopkeeper())
-                <li class="nav-item">
-                    <a href="{{ route('shopkeeper.dashboard') }}" class="nav-link {{ request()->routeIs('shopkeeper.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                </li>
-            @endif
+    <li class="nav-item">
+        <a href="{{ route('shopkeeper.dashboard') }}" class="nav-link {{ request()->routeIs('shopkeeper.dashboard') ? 'active' : '' }}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('shopkeeper.products.index') }}" class="nav-link {{ request()->routeIs('shopkeeper.products.*') ? 'active' : '' }}">
+            <i class="bi bi-box-seam"></i> Products
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('shopkeeper.orders.index') }}" class="nav-link {{ request()->routeIs('shopkeeper.orders.*') ? 'active' : '' }}">
+            <i class="bi bi-bag-check"></i> Orders
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('shopkeeper.visits.index') }}" class="nav-link {{ request()->routeIs('shopkeeper.visits.*') ? 'active' : '' }}">
+            <i class="bi bi-geo-alt"></i> Visits
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="{{ route('shopkeeper.profile.show') }}" class="nav-link {{ request()->routeIs('shopkeeper.profile.*') ? 'active' : '' }}">
+            <i class="bi bi-person"></i> Profile
+        </a>
+    </li>
+@endif
 
         </ul>
     </aside>
@@ -256,6 +301,14 @@
                     Password: <code>{{ session('generated_password') }}</code>
                 </div>
             @endif
+
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show">
+        {{ session('error') }}
+    </div>
+@endif
+
+
 
             @yield('content')
         </div>
