@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ShopAssignmentController;
 use App\Http\Controllers\Admin\VisitController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\CompanyProfileController;
+use App\Http\Controllers\Admin\RouteHistoryController;
 
 use App\Http\Controllers\Distributor\DashboardController as DistributorDashboardController;
 use App\Http\Controllers\Distributor\VisitController as DistributorVisitController;
@@ -91,6 +93,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('reports/visits', [ReportController::class, 'visits'])->name('reports.visits');
     Route::get('reports/orders', [ReportController::class, 'orders'])->name('reports.orders');
 
+    Route::get('company-profile', [CompanyProfileController::class, 'edit'])->name('company-profile.edit');
+    Route::put('company-profile', [CompanyProfileController::class, 'update'])->name('company-profile.update');
+
+    Route::get('route-history', [RouteHistoryController::class, 'index'])->name('route-history.index');
 
     });
    

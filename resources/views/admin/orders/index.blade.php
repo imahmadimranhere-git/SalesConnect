@@ -81,16 +81,20 @@
                                     <i class="bi bi-eye"></i> View
                                 </a>
 
-                                <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="d-flex gap-1">
-                                    @csrf
-                                    @method('PATCH')
-                                    <select name="status" class="form-select form-select-sm" style="width: auto;">
-                                        <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="delivered" {{ $order->status === 'delivered' ? 'selected' : '' }}>Delivered</option>
-                                        <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                                </form>
+                                @if ($order->status === 'pending')
+                                    <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="d-flex gap-1">
+                                        @csrf
+                                        @method('PATCH')
+                                        <select name="status" class="form-select form-select-sm" style="width: auto;">
+                                            <option value="pending" selected>Pending</option>
+                                            <option value="delivered">Delivered</option>
+                                            <option value="cancelled">Cancelled</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                    </form>
+                                @else
+                                    <span class="text-muted small"><i class="bi bi-lock"></i> Finalized</span>
+                                @endif
                             </div>
                         </td>
                     </tr>

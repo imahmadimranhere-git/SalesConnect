@@ -110,10 +110,14 @@
 
     {{-- ============ SIDEBAR ============ --}}
     <aside class="sidebar" id="sidebar">
-       <a href="#" class="brand">
-    {{ auth()->check() && auth()->user()->company ? auth()->user()->company->name : \App\Models\Setting::current()->app_name }}
+       <a href="#" class="brand d-flex align-items-center gap-2">
+    @if (auth()->check() && auth()->user()->company && auth()->user()->company->logo)
+        <img src="{{ asset('storage/' . auth()->user()->company->logo) }}" alt="Logo" style="height: 28px; width: 28px; object-fit: cover; border-radius: 4px;">
+    @endif
+    <span>
+        {{ auth()->check() && auth()->user()->company ? auth()->user()->company->name : \App\Models\Setting::current()->app_name }}
+    </span>
 </a>
-
         <ul class="nav flex-column">
 
             @if (auth()->user()->isSuperAdmin())
@@ -182,8 +186,20 @@
 </li>
 
 <li class="nav-item">
+    <a href="{{ route('admin.route-history.index') }}" class="nav-link {{ request()->routeIs('admin.route-history.*') ? 'active' : '' }}">
+        <i class="bi bi-map"></i> Route History
+    </a>
+</li>
+
+<li class="nav-item">
     <a href="{{ route('admin.reports.sales') }}" class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
         <i class="bi bi-graph-up"></i> Reports
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ route('admin.company-profile.edit') }}" class="nav-link {{ request()->routeIs('admin.company-profile.*') ? 'active' : '' }}">
+        <i class="bi bi-building-gear"></i> Company Profile
     </a>
 </li>
 

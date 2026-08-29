@@ -4,10 +4,15 @@
 <div class="bg-white p-4 rounded shadow-sm">
 
     <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
-        <div>
-            <h4 class="mb-1">{{ $order->company?->name ?? 'SalesConnect' }}</h4>
-            <div class="text-muted small">Invoice / Order Receipt</div>
-        </div>
+        <div class="d-flex align-items-center gap-2">
+    @if ($order->company?->logo)
+        <img src="{{ asset('storage/' . $order->company->logo) }}" alt="Logo" style="height: 45px; width: 45px; object-fit: cover; border-radius: 6px;">
+    @endif
+    <div>
+        <h4 class="mb-0">{{ $order->company?->name ?? 'SalesConnect' }}</h4>
+        <div class="text-muted small">Invoice / Order Receipt</div>
+    </div>
+</div>
         <div class="text-end">
             <h3 class="mb-1">Order #{{ $order->id }}</h3>
             <span class="badge {{ $order->status === 'delivered' ? 'bg-success' : ($order->status === 'cancelled' ? 'bg-danger' : 'bg-warning') }}">

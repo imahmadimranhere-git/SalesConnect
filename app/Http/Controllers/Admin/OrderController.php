@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
 
+
 class OrderController extends Controller
 {
     public function index(Request $request): View
@@ -37,20 +38,23 @@ class OrderController extends Controller
     return view('admin.orders.index', compact('orders', 'distributors'));
 }
 
-    public function updateStatus(Request $request, Order $order): RedirectResponse
+   public function updateStatus(Request $request, Order $order): RedirectResponse
 {
+    // Once an order is delivered or cancelled, it becomes final — no further changes allowed.
+    if (in_array($order->status, ['delivered', 'cancelled'])) {
+        return redirect()
+            ->route('admin.orders.index')
+            ->with('error', 'This order is already finalized and cannot be changed.');
+    }
+
     $request->validate([
         'status' => ['required', 'in:pending,delivered,cancelled'],
     ]);
 
-    $newStatus = $request->status;
-    $wasAlreadyDelivered = $order->status === 'delivered';
+    DB::transaction(function () use ($order, $request) {
+        $order->update(['status' => $request->status]);
 
-    DB::transaction(function () use ($order, $newStatus, $wasAlreadyDelivered) {
-        $order->update(['status' => $newStatus]);
-
-        // Only deduct stock the FIRST time an order becomes "delivered".
-        if ($newStatus === 'delivered' && ! $wasAlreadyDelivered) {
+        if ($request->status === 'delivered') {
             foreach ($order->items as $item) {
                 $item->product->decrement('stock_quantity', $item->quantity);
             }
