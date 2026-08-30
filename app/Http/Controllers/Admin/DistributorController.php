@@ -11,18 +11,27 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
+
 
 class DistributorController extends Controller
 {
-    public function index(): View
-    {
-        $distributors = User::where('company_id', auth()->user()->company_id)
-            ->where('role', 'distributor')
-            ->latest()
-            ->paginate(10);
+    public function index(Request $request): View
+{
+    $distributors = User::where('company_id', auth()->user()->company_id)
+        ->where('role', 'distributor')
+        ->when($request->search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        })
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-        return view('admin.distributors.index', compact('distributors'));
-    }
+    return view('admin.distributors.index', compact('distributors'));
+}
 
     public function create(): View
     {

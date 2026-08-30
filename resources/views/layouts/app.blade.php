@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'SalesConnect') }}</title>
+    <title>{{ \App\Models\Setting::current()->app_name }}</title>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -16,7 +16,7 @@
         /* Sidebar */
         .sidebar {
             width: 250px;
-            min-height: 100vh;
+            height: 100vh;
             background-color: #1e293b;
             position: fixed;
             top: 0;
@@ -24,6 +24,8 @@
             padding-top: 1rem;
             transition: transform 0.3s ease;
             z-index: 1040;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar .brand {
@@ -34,6 +36,11 @@
             margin-bottom: 0.5rem;
             display: block;
             text-decoration: none;
+        }
+
+        .sidebar .nav {
+            flex: 1;
+            overflow-y: auto;
         }
 
         .sidebar .nav-link {
@@ -59,15 +66,52 @@
             color: #fff;
         }
 
+        .sidebar-footer {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 1rem 1.25rem;
+        }
+
+        .sidebar-footer .user-name {
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-footer .user-role {
+            display: inline-block;
+            background-color: rgba(13, 110, 253, 0.25);
+            color: #8ab4ff;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-top: 2px;
+        }
+
         /* Main content area shifts right of sidebar on large screens */
         .main-content {
             margin-left: 250px;
             transition: margin-left 0.3s ease;
         }
 
-        .topbar {
-            background-color: #fff;
-            border-bottom: 1px solid #e2e8f0;
+        /* Floating hamburger toggle (mobile only) */
+        #sidebarToggle {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 1030;
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        #sidebarToggle i {
+            font-size: 1.1rem;
         }
 
         /* Mobile: sidebar hidden by default, slides in */
@@ -80,6 +124,9 @@
             }
             .main-content {
                 margin-left: 0;
+            }
+            .content-wrapper {
+                padding-top: 4.5rem !important;
             }
         }
 
@@ -110,14 +157,15 @@
 
     {{-- ============ SIDEBAR ============ --}}
     <aside class="sidebar" id="sidebar">
-       <a href="#" class="brand d-flex align-items-center gap-2">
-    @if (auth()->check() && auth()->user()->company && auth()->user()->company->logo)
-        <img src="{{ asset('storage/' . auth()->user()->company->logo) }}" alt="Logo" style="height: 28px; width: 28px; object-fit: cover; border-radius: 4px;">
-    @endif
-    <span>
-        {{ auth()->check() && auth()->user()->company ? auth()->user()->company->name : \App\Models\Setting::current()->app_name }}
-    </span>
-</a>
+        <a href="#" class="brand d-flex align-items-center gap-2">
+            @if (auth()->check() && auth()->user()->company && auth()->user()->company->logo)
+                <img src="{{ asset('storage/' . auth()->user()->company->logo) }}" alt="Logo" style="height: 28px; width: 28px; object-fit: cover; border-radius: 4px;">
+            @endif
+            <span>
+                {{ auth()->check() && auth()->user()->company ? auth()->user()->company->name : \App\Models\Setting::current()->app_name }}
+            </span>
+        </a>
+
         <ul class="nav flex-column">
 
             @if (auth()->user()->isSuperAdmin())
@@ -148,132 +196,139 @@
                 </li>
             @endif
 
-           @if (auth()->user()->isAdmin())
-    <li class="nav-item">
-        <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ route('admin.distributors.index') }}" class="nav-link {{ request()->routeIs('admin.distributors.*') ? 'active' : '' }}">
-            <i class="bi bi-truck"></i> Distributors
-        </a>
-    </li>
-    
+            @if (auth()->user()->isAdmin())
+                <li class="nav-item">
+                    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.distributors.index') }}" class="nav-link {{ request()->routeIs('admin.distributors.*') ? 'active' : '' }}">
+                        <i class="bi bi-truck"></i> Distributors
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.shops.index') }}" class="nav-link {{ request()->routeIs('admin.shops.*') ? 'active' : '' }}">
+                        <i class="bi bi-geo-alt"></i> Shops
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.products.index') }}" class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+                        <i class="bi bi-box-seam"></i> Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+                        <i class="bi bi-bag-check"></i> Orders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.visits.index') }}" class="nav-link {{ request()->routeIs('admin.visits.*') ? 'active' : '' }}">
+                        <i class="bi bi-geo-alt"></i> Visits
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.route-history.index') }}" class="nav-link {{ request()->routeIs('admin.route-history.*') ? 'active' : '' }}">
+                        <i class="bi bi-map"></i> Route History
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.reports.sales') }}" class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.company-profile.edit') }}" class="nav-link {{ request()->routeIs('admin.company-profile.*') ? 'active' : '' }}">
+                        <i class="bi bi-building-gear"></i> Company Profile
+                    </a>
+                </li>
+            @endif
 
-<li class="nav-item">
-    <a href="{{ route('admin.shops.index') }}" class="nav-link {{ request()->routeIs('admin.shops.*') ? 'active' : '' }}">
-        <i class="bi bi-geo-alt"></i> Shops
-    </a>
-</li>
-
-<li class="nav-item">
-    <a href="{{ route('admin.products.index') }}" class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
-        <i class="bi bi-box-seam"></i> Products
-    </a>
-</li>
-
-<li class="nav-item">
-    <a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-        <i class="bi bi-bag-check"></i> Orders
-    </a>
-</li>
-
-<li class="nav-item">
-    <a href="{{ route('admin.visits.index') }}" class="nav-link {{ request()->routeIs('admin.visits.*') ? 'active' : '' }}">
-        <i class="bi bi-geo-alt"></i> Visits
-    </a>
-</li>
-
-<li class="nav-item">
-    <a href="{{ route('admin.route-history.index') }}" class="nav-link {{ request()->routeIs('admin.route-history.*') ? 'active' : '' }}">
-        <i class="bi bi-map"></i> Route History
-    </a>
-</li>
-
-<li class="nav-item">
-    <a href="{{ route('admin.reports.sales') }}" class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-        <i class="bi bi-graph-up"></i> Reports
-    </a>
-</li>
-
-<li class="nav-item">
-    <a href="{{ route('admin.company-profile.edit') }}" class="nav-link {{ request()->routeIs('admin.company-profile.*') ? 'active' : '' }}">
-        <i class="bi bi-building-gear"></i> Company Profile
-    </a>
-</li>
-
-@endif
-
-           @if (auth()->user()->isDistributor())
-    <li class="nav-item">
-        <a href="{{ route('distributor.dashboard') }}" class="nav-link {{ request()->routeIs('distributor.dashboard') ? 'active' : '' }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ route('distributor.route-plan') }}" class="nav-link {{ request()->routeIs('distributor.route-plan') ? 'active' : '' }}">
-            <i class="bi bi-signpost-split"></i> Route Plan
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ route('distributor.my-shops.index') }}" class="nav-link {{ request()->routeIs('distributor.my-shops.*') ? 'active' : '' }}">
-            <i class="bi bi-shop"></i> My Shops
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ route('distributor.orders.index') }}" class="nav-link {{ request()->routeIs('distributor.orders.*') ? 'active' : '' }}">
-            <i class="bi bi-bag-check"></i> Orders
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ route('distributor.products.index') }}" class="nav-link {{ request()->routeIs('distributor.products.*') ? 'active' : '' }}">
-            <i class="bi bi-box-seam"></i> Products
-        </a>
-    </li>
-
-<li class="nav-item">
-    <a href="{{ route('distributor.reports.sales') }}" class="nav-link {{ request()->routeIs('distributor.reports.*') ? 'active' : '' }}">
-        <i class="bi bi-graph-up"></i> Reports
-    </a>
-</li>
-
-    <li class="nav-item">
-        <a href="{{ route('distributor.profile.show') }}" class="nav-link {{ request()->routeIs('distributor.profile.*') ? 'active' : '' }}">
-            <i class="bi bi-person"></i> Profile
-        </a>
-    </li>
-@endif
+            @if (auth()->user()->isDistributor())
+                <li class="nav-item">
+                    <a href="{{ route('distributor.dashboard') }}" class="nav-link {{ request()->routeIs('distributor.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('distributor.route-plan') }}" class="nav-link {{ request()->routeIs('distributor.route-plan') ? 'active' : '' }}">
+                        <i class="bi bi-signpost-split"></i> Route Plan
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('distributor.my-shops.index') }}" class="nav-link {{ request()->routeIs('distributor.my-shops.*') ? 'active' : '' }}">
+                        <i class="bi bi-shop"></i> My Shops
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('distributor.orders.index') }}" class="nav-link {{ request()->routeIs('distributor.orders.*') ? 'active' : '' }}">
+                        <i class="bi bi-bag-check"></i> Orders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('distributor.products.index') }}" class="nav-link {{ request()->routeIs('distributor.products.*') ? 'active' : '' }}">
+                        <i class="bi bi-box-seam"></i> Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('distributor.reports.sales') }}" class="nav-link {{ request()->routeIs('distributor.reports.*') ? 'active' : '' }}">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('distributor.profile.show') }}" class="nav-link {{ request()->routeIs('distributor.profile.*') ? 'active' : '' }}">
+                        <i class="bi bi-person"></i> Profile
+                    </a>
+                </li>
+            @endif
 
             @if (auth()->user()->isShopkeeper())
-    <li class="nav-item">
-        <a href="{{ route('shopkeeper.dashboard') }}" class="nav-link {{ request()->routeIs('shopkeeper.dashboard') ? 'active' : '' }}">
-            <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ route('shopkeeper.products.index') }}" class="nav-link {{ request()->routeIs('shopkeeper.products.*') ? 'active' : '' }}">
-            <i class="bi bi-box-seam"></i> Products
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ route('shopkeeper.orders.index') }}" class="nav-link {{ request()->routeIs('shopkeeper.orders.*') ? 'active' : '' }}">
-            <i class="bi bi-bag-check"></i> Orders
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ route('shopkeeper.visits.index') }}" class="nav-link {{ request()->routeIs('shopkeeper.visits.*') ? 'active' : '' }}">
-            <i class="bi bi-geo-alt"></i> Visits
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ route('shopkeeper.profile.show') }}" class="nav-link {{ request()->routeIs('shopkeeper.profile.*') ? 'active' : '' }}">
-            <i class="bi bi-person"></i> Profile
-        </a>
-    </li>
-@endif
+                <li class="nav-item">
+                    <a href="{{ route('shopkeeper.dashboard') }}" class="nav-link {{ request()->routeIs('shopkeeper.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('shopkeeper.products.index') }}" class="nav-link {{ request()->routeIs('shopkeeper.products.*') ? 'active' : '' }}">
+                        <i class="bi bi-box-seam"></i> Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('shopkeeper.orders.index') }}" class="nav-link {{ request()->routeIs('shopkeeper.orders.*') ? 'active' : '' }}">
+                        <i class="bi bi-bag-check"></i> Orders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('shopkeeper.visits.index') }}" class="nav-link {{ request()->routeIs('shopkeeper.visits.*') ? 'active' : '' }}">
+                        <i class="bi bi-geo-alt"></i> Visits
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('shopkeeper.profile.show') }}" class="nav-link {{ request()->routeIs('shopkeeper.profile.*') ? 'active' : '' }}">
+                        <i class="bi bi-person"></i> Profile
+                    </a>
+                </li>
+            @endif
 
         </ul>
+
+        {{-- ============ SIDEBAR FOOTER — LOGOUT (Fixed) ============ --}}
+        @auth
+            <div class="sidebar-footer">
+                <div class="user-name">
+                    {{ auth()->user()->name }}
+                    <div>
+                        <span class="user-role">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</span>
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('logout') }}" class="mt-2">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-light btn-sm w-100">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </div>
+        @endauth
     </aside>
 
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -281,32 +336,22 @@
     {{-- ============ MAIN CONTENT ============ --}}
     <div class="main-content" id="mainContent">
 
-        <nav class="navbar topbar navbar-expand-lg">
-            <div class="container-fluid">
-                <button class="btn btn-outline-secondary d-lg-none" id="sidebarToggle" type="button">
-                    <i class="bi bi-list fs-4"></i>
-                </button>
+        <button class="btn btn-light d-lg-none" id="sidebarToggle" type="button">
+            <i class="bi bi-list"></i>
+        </button>
 
-                <div class="ms-auto d-flex align-items-center gap-3">
-                    @auth
-                        <span class="text-secondary small">
-                            {{ auth()->user()->name }} ({{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }})
-                        </span>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
-                        </form>
-                    @endauth
-                </div>
-            </div>
-        </nav>
-
-        <div class="container-fluid py-4">
+        <div class="container-fluid py-4 content-wrapper">
 
             {{-- All flash messages are handled centrally here, on every page --}}
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show">
                     {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ session('error') }}
                 </div>
             @endif
 
@@ -317,14 +362,6 @@
                     Password: <code>{{ session('generated_password') }}</code>
                 </div>
             @endif
-
-@if (session('error'))
-    <div class="alert alert-danger alert-dismissible fade show">
-        {{ session('error') }}
-    </div>
-@endif
-
-
 
             @yield('content')
         </div>
@@ -351,8 +388,8 @@
         toggleBtn.addEventListener('click', openSidebar);
         backdrop.addEventListener('click', closeSidebar);
 
-        // Auto-dismiss every alert after 3 seconds
         document.addEventListener('DOMContentLoaded', function () {
+            // Auto-dismiss every alert after 3 seconds
             const alerts = document.querySelectorAll('.alert-dismissible');
 
             alerts.forEach(function (alert) {
@@ -362,6 +399,15 @@
                         alert.remove();
                     }, 300);
                 }, 3000);
+            });
+
+            // Fix dropdown menus getting clipped inside scrollable tables
+            document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function (el) {
+                new bootstrap.Dropdown(el, {
+                    popperConfig: {
+                        strategy: 'fixed'
+                    }
+                });
             });
         });
     </script>

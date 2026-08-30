@@ -16,12 +16,18 @@ use Illuminate\View\View;
 
 class ShopController extends Controller
 {
-    public function index(): View
-    {
-        $shops = Shop::with('shopkeeper')->latest()->paginate(10);
+   public function index(Request $request): View
+{
+    $shops = Shop::with('shopkeeper')
+        ->when($request->search, function ($query, $search) {
+            $query->where('name', 'like', "%{$search}%");
+        })
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-        return view('admin.shops.index', compact('shops'));
-    }
+    return view('admin.shops.index', compact('shops'));
+}
 
     public function create(): View
     {

@@ -9,15 +9,21 @@ use App\Models\ActivityLog;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index(): View
-    {
-        $products = Product::latest()->paginate(10);
+    public function index(Request $request): View
+{
+    $products = Product::when($request->search, function ($query, $search) {
+            $query->where('name', 'like', "%{$search}%");
+        })
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-        return view('admin.products.index', compact('products'));
-    }
+    return view('admin.products.index', compact('products'));
+}
 
     public function create(): View
     {
