@@ -26,6 +26,7 @@
             z-index: 1040;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .sidebar .brand {
@@ -34,27 +35,48 @@
             padding: 0 1.25rem 1rem 1.25rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 0.5rem;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .sidebar .nav {
-            flex: 1;
+            flex: 1 1 auto;
             overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 0;
+            flex-wrap: nowrap !important;
+
+            /* Hide scrollbar visually, but keep scrolling functional */
+            scrollbar-width: none;      /* Firefox */
+            -ms-overflow-style: none;   /* IE/Edge */
         }
 
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.75);
-            padding: 0.65rem 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            border-radius: 0;
+        .sidebar .nav::-webkit-scrollbar {
+            display: none;              /* Chrome, Safari, Edge (Chromium) */
         }
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,0.75);
+    padding: 0.45rem 1.25rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
         .sidebar .nav-link i {
-            font-size: 1.1rem;
-        }
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
 
         .sidebar .nav-link:hover {
             background-color: rgba(255,255,255,0.08);
@@ -67,6 +89,7 @@
         }
 
         .sidebar-footer {
+            flex-shrink: 0;
             border-top: 1px solid rgba(255,255,255,0.1);
             padding: 1rem 1.25rem;
         }
@@ -76,6 +99,9 @@
             font-size: 0.9rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .sidebar-footer .user-role {
@@ -157,11 +183,11 @@
 
     {{-- ============ SIDEBAR ============ --}}
     <aside class="sidebar" id="sidebar">
-        <a href="#" class="brand d-flex align-items-center gap-2">
+        <a href="#" class="brand">
             @if (auth()->check() && auth()->user()->company && auth()->user()->company->logo)
-                <img src="{{ asset('storage/' . auth()->user()->company->logo) }}" alt="Logo" style="height: 28px; width: 28px; object-fit: cover; border-radius: 4px;">
+                <img src="{{ asset('storage/' . auth()->user()->company->logo) }}" alt="Logo" style="height: 28px; width: 28px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
             @endif
-            <span>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 {{ auth()->check() && auth()->user()->company ? auth()->user()->company->name : \App\Models\Setting::current()->app_name }}
             </span>
         </a>
@@ -355,13 +381,29 @@
                 </div>
             @endif
 
-            @if (session('generated_password'))
-                <div class="alert alert-warning alert-dismissible fade show">
-                    <strong>Save this password now — it will not be shown again:</strong><br>
-                    Email: <code>{{ session('generated_email') }}</code><br>
-                    Password: <code>{{ session('generated_password') }}</code>
-                </div>
-            @endif
+         @if (session('generated_password'))
+    <div class="alert alert-warning position-relative pe-5" id="passwordAlert">
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-2" onclick="document.getElementById('passwordAlert').remove()"></button>
+
+        <strong>Save this password now — it will not be shown again:</strong>
+
+        <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+            <span>Email:</span>
+            <code id="genEmail">{{ session('generated_email') }}</code>
+            <button type="button" class="btn btn-sm btn-outline-dark copy-btn" data-target="genEmail">
+                <i class="bi bi-clipboard"></i> Copy
+            </button>
+        </div>
+
+        <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+            <span>Password:</span>
+            <code id="genPassword">{{ session('generated_password') }}</code>
+            <button type="button" class="btn btn-sm btn-outline-dark copy-btn" data-target="genPassword">
+                <i class="bi bi-clipboard"></i> Copy
+            </button>
+        </div>
+    </div>
+@endif
 
             @yield('content')
         </div>
@@ -389,6 +431,24 @@
         backdrop.addEventListener('click', closeSidebar);
 
         document.addEventListener('DOMContentLoaded', function () {
+
+        // Copy-to-clipboard buttons for generated credentials
+document.querySelectorAll('.copy-btn').forEach(function (button) {
+    button.addEventListener('click', function () {
+        const targetId = button.getAttribute('data-target');
+        const text = document.getElementById(targetId).innerText;
+
+        navigator.clipboard.writeText(text).then(function () {
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+
+            setTimeout(function () {
+                button.innerHTML = originalHtml;
+            }, 1500);
+        });
+    });
+});
+
             // Auto-dismiss every alert after 3 seconds
             const alerts = document.querySelectorAll('.alert-dismissible');
 
