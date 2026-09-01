@@ -145,8 +145,8 @@
         {{-- ============ LEFT — BRANDING PANEL (hidden on mobile) ============ --}}
         <div class="brand-panel">
             <div class="logo-circle">
-                <i class="bi bi-diagram-3"></i>
-            </div>
+    <img src="{{ asset('images/logo.png') }}" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 20px;">
+</div>
             <h1>{{ \App\Models\Setting::current()->app_name }}</h1>
             <p>Manage your distribution network — companies, distributors, shops, and orders — all in one place.</p>
 
@@ -163,8 +163,8 @@
 
                 <div class="mobile-logo">
                     <div class="logo-circle-sm">
-                        <i class="bi bi-diagram-3"></i>
-                    </div>
+    <img src="{{ asset('images/logo.png') }}" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 10px;">
+</div>
                     <span>{{ \App\Models\Setting::current()->app_name }}</span>
                 </div>
 
