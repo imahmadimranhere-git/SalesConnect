@@ -28,11 +28,18 @@ class ShopAssignmentController extends Controller
 
         $shops = Shop::orderBy('name')->get(['id', 'name', 'area']);
 
+        // Work out the next available visit order for each day (max existing + 1).
+        $nextOrderByDay = [];
+        foreach ($this->days as $day) {
+            $nextOrderByDay[$day] = $assignments->get($day, collect())->max('visit_order') + 1;
+        }
+
         return view('admin.assignments.index', [
             'distributor' => $distributor,
             'assignments' => $assignments,
             'shops' => $shops,
             'days' => $this->days,
+            'nextOrderByDay' => $nextOrderByDay,
         ]);
     }
 
@@ -41,6 +48,15 @@ class ShopAssignmentController extends Controller
         abort_if($distributor->company_id !== auth()->user()->company_id || $distributor->role !== 'distributor', 404);
 
         $validated = $request->validated();
+
+        $alreadyExists = ShopAssignment::where('distributor_id', $distributor->id)
+            ->where('shop_id', $validated['shop_id'])
+            ->where('day_of_week', $validated['day_of_week'])
+            ->exists();
+
+        if ($alreadyExists) {
+            return back()->with('error', 'This shop is already assigned to this distributor on this day.');
+        }
 
         ShopAssignment::create([
             'distributor_id' => $distributor->id,

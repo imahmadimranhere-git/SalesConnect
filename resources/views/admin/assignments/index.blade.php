@@ -28,7 +28,7 @@
 
             <div class="col-12 col-md-3">
                 <label class="form-label small">Day</label>
-                <select name="day_of_week" class="form-select form-select-sm @error('day_of_week') is-invalid @enderror">
+                <select name="day_of_week" id="daySelect" class="form-select form-select-sm @error('day_of_week') is-invalid @enderror">
                     @foreach ($days as $day)
                         <option value="{{ $day }}">{{ ucfirst($day) }}</option>
                     @endforeach
@@ -38,7 +38,7 @@
 
             <div class="col-6 col-md-2">
                 <label class="form-label small">Visit Order</label>
-                <input type="number" name="visit_order" min="1" value="1" class="form-control form-control-sm @error('visit_order') is-invalid @enderror">
+                <input type="number" name="visit_order" id="visitOrderInput" min="1" value="{{ old('visit_order', $nextOrderByDay[$days[0]]) }}" class="form-control form-control-sm @error('visit_order') is-invalid @enderror">
                 @error('visit_order') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
@@ -81,3 +81,14 @@
     </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    const nextOrderByDay = @json($nextOrderByDay);
+
+    document.getElementById('daySelect').addEventListener('change', function () {
+        const selectedDay = this.value;
+        document.getElementById('visitOrderInput').value = nextOrderByDay[selectedDay];
+    });
+</script>
+@endpush

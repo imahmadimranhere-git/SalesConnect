@@ -4,7 +4,19 @@
 
     <h3 class="mb-4">Admin Dashboard</h3>
 
-    <div class="row g-3">
+    @if ($oldPendingOrders > 0)
+        <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+            <div>
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                You have <strong>{{ $oldPendingOrders }}</strong> pending order(s) from last month or earlier that still need action.
+            </div>
+            <a href="{{ route('admin.orders.index', ['status' => 'pending', 'date_to' => $oldPendingCutoffDate]) }}" class="btn btn-sm btn-dark">
+                View Orders
+            </a>
+        </div>
+    @endif
+
+    <div class="row g-3 mb-3">
 
         <div class="col-12 col-sm-6 col-lg-4">
             <div class="card shadow-sm border-0">
@@ -33,9 +45,7 @@
                 </div>
             </div>
         </div>
-
-      {{-- 
-<div class="col-12 col-sm-6 col-lg-4">
+{{--  <div class="col-12 col-sm-6 col-lg-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body d-flex align-items-center">
                     <div class="bg-info bg-opacity-10 text-info rounded p-3 me-3">
@@ -47,8 +57,8 @@
                     </div>
                 </div>
             </div>
-        </div>
---}}
+        </div> --}}
+       
 
         <div class="col-12 col-sm-6 col-lg-4">
             <div class="card shadow-sm border-0">
@@ -94,9 +104,57 @@
 
     </div>
 
-    <div class="alert alert-light border mt-4">
+    <h5 class="mb-3">Sales Overview</h5>
+
+    <div class="row g-3 mb-3">
+
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 text-success rounded p-3 me-3">
+                        <i class="bi bi-cash-coin fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Today's Sales</div>
+                        <div class="fs-4 fw-bold">Rs. {{ number_format($todaySales, 2) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded p-3 me-3">
+                        <i class="bi bi-calendar-month fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">This Month's Sales</div>
+                        <div class="fs-4 fw-bold">Rs. {{ number_format($monthlySales, 2) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded p-3 me-3">
+                        <i class="bi bi-graph-up-arrow fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">This Year's Sales</div>
+                        <div class="fs-4 fw-bold">Rs. {{ number_format($yearlySales, 2) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="alert alert-light border">
         <i class="bi bi-info-circle"></i>
-        Visits, Orders, and detailed reports will appear here once those modules are built.
+        Visits and detailed reports will appear here once those modules are built.
     </div>
 
 @endsection

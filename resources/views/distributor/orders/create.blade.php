@@ -12,7 +12,9 @@
             <select name="shop_id" class="form-select @error('shop_id') is-invalid @enderror" required>
                 <option value="">Select a shop</option>
                 @foreach ($shops as $shop)
-                    <option value="{{ $shop->id }}">{{ $shop->name }} ({{ $shop->area }})</option>
+                    <option value="{{ $shop->id }}" {{ old('shop_id') == $shop->id ? 'selected' : '' }}>
+                        {{ $shop->name }} ({{ $shop->area }})
+                    </option>
                 @endforeach
             </select>
             @error('shop_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -93,10 +95,18 @@
 
             const selectedOption = select.options[select.selectedIndex];
             const price = parseFloat(selectedOption?.dataset.price || 0);
+            const stock = parseInt(selectedOption?.dataset.stock || 0);
             const qty = parseInt(qtyInput.value || 0);
 
             const subtotal = price * qty;
-            subtotalSpan.innerText = 'Rs. ' + subtotal.toFixed(2);
+
+            if (qty > stock) {
+                subtotalSpan.innerHTML = '<span class="text-danger">Only ' + stock + ' in stock!</span>';
+                qtyInput.classList.add('is-invalid');
+            } else {
+                subtotalSpan.innerText = 'Rs. ' + subtotal.toFixed(2);
+                qtyInput.classList.remove('is-invalid');
+            }
 
             total += subtotal;
         });

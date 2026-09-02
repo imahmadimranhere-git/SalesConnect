@@ -41,6 +41,17 @@ class OrderController extends Controller
             'products.*.quantity' => ['required', 'integer', 'min:1'],
         ]);
 
+        // Check stock availability BEFORE creating anything.
+        foreach ($validated['products'] as $item) {
+            $product = Product::find($item['id']);
+
+            if ($product && $item['quantity'] > $product->stock_quantity) {
+                return back()
+                    ->withInput()
+                    ->with('error', "Not enough stock for \"{$product->name}\". Available: {$product->stock_quantity}, requested: {$item['quantity']}.");
+            }
+        }
+
         $order = DB::transaction(function () use ($validated) {
             $order = Order::create([
                 'shop_id' => $validated['shop_id'],
@@ -85,33 +96,33 @@ class OrderController extends Controller
         return view('distributor.orders.show', compact('order'));
     }
 
-   public function updateStatus(Request $request, Order $order): RedirectResponse
-{
-    abort_if($order->distributor_id !== auth()->id(), 403);
+    public function updateStatus(Request $request, Order $order): RedirectResponse
+    {
+        abort_if($order->distributor_id !== auth()->id(), 403);
 
-    // Once an order is delivered or cancelled, it becomes final — no further changes allowed.
-    if (in_array($order->status, ['delivered', 'cancelled'])) {
+        // Once an order is delivered or cancelled, it becomes final — no further changes allowed.
+        if (in_array($order->status, ['delivered', 'cancelled'])) {
+            return redirect()
+                ->route('distributor.orders.index')
+                ->with('error', 'This order is already finalized and cannot be changed.');
+        }
+
+        $request->validate([
+            'status' => ['required', 'in:pending,delivered,cancelled'],
+        ]);
+
+        DB::transaction(function () use ($order, $request) {
+            $order->update(['status' => $request->status]);
+
+            if ($request->status === 'delivered') {
+                foreach ($order->items as $item) {
+                    $item->product->decrement('stock_quantity', $item->quantity);
+                }
+            }
+        });
+
         return redirect()
             ->route('distributor.orders.index')
-            ->with('error', 'This order is already finalized and cannot be changed.');
+            ->with('success', 'Order status updated successfully.');
     }
-
-    $request->validate([
-        'status' => ['required', 'in:pending,delivered,cancelled'],
-    ]);
-
-    DB::transaction(function () use ($order, $request) {
-        $order->update(['status' => $request->status]);
-
-        if ($request->status === 'delivered') {
-            foreach ($order->items as $item) {
-                $item->product->decrement('stock_quantity', $item->quantity);
-            }
-        }
-    });
-
-    return redirect()
-        ->route('distributor.orders.index')
-        ->with('success', 'Order status updated successfully.');
-}
 }
