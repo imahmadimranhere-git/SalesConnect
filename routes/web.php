@@ -93,6 +93,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('reports/visits', [ReportController::class, 'visits'])->name('reports.visits');
     Route::get('reports/orders', [ReportController::class, 'orders'])->name('reports.orders');
 
+    Route::get('reports/sales/export', [ReportController::class, 'exportSalesPdf'])->name('reports.sales.export');
+    Route::get('reports/visits/export', [ReportController::class, 'exportVisitsPdf'])->name('reports.visits.export');
+    Route::get('reports/orders/export', [ReportController::class, 'exportOrdersPdf'])->name('reports.orders.export');
+
     Route::get('company-profile', [CompanyProfileController::class, 'edit'])->name('company-profile.edit');
     Route::put('company-profile', [CompanyProfileController::class, 'update'])->name('company-profile.update');
 
@@ -122,6 +126,11 @@ Route::middleware(['auth', 'role:distributor'])->prefix('distributor')->name('di
     Route::get('reports/sales', [DistributorReportController::class, 'sales'])->name('reports.sales');
     Route::get('reports/visits', [DistributorReportController::class, 'visits'])->name('reports.visits');
     Route::get('reports/orders', [DistributorReportController::class, 'orders'])->name('reports.orders');
+
+    Route::get('reports/sales/export', [DistributorReportController::class, 'exportSalesPdf'])->name('reports.sales.export');
+Route::get('reports/visits/export', [DistributorReportController::class, 'exportVisitsPdf'])->name('reports.visits.export');
+Route::get('reports/orders/export', [DistributorReportController::class, 'exportOrdersPdf'])->name('reports.orders.export');
+
 
     Route::patch('orders/{order}/update-status', [DistributorOrderController::class, 'updateStatus'])->name('orders.update-status');
     

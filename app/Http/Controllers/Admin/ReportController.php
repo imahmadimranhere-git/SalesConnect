@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -85,5 +86,92 @@ class ReportController extends Controller
             ->withQueryString();
 
         return view('admin.reports.orders', compact('pending', 'delivered', 'cancelled', 'orders', 'from', 'to'));
-    }
+    }    
+
+
+public function exportSalesPdf(Request $request)
+{
+    [$from, $to] = $this->dateRange($request);
+
+    $baseQuery = Order::where('status', 'delivered')
+        ->whereDate('created_at', '>=', $from)
+        ->whereDate('created_at', '<=', $to);
+
+    $totalSales = (clone $baseQuery)->sum('total_amount');
+    $totalOrders = (clone $baseQuery)->count();
+
+    $byDistributor = (clone $baseQuery)
+        ->with('distributor')
+        ->get()
+        ->groupBy('distributor_id')
+        ->map(function ($orders) {
+            return [
+                'name' => $orders->first()->distributor?->name ?? 'N/A',
+                'orders' => $orders->count(),
+                'total' => $orders->sum('total_amount'),
+            ];
+        });
+
+    $companyName = auth()->user()->company?->name ?? 'SalesConnect';
+
+    $pdf = Pdf::loadView('admin.reports.pdf.sales', compact(
+        'totalSales', 'totalOrders', 'byDistributor', 'from', 'to', 'companyName'
+    ));
+
+    return $pdf->download("sales-report-{$from}-to-{$to}.pdf");
+}
+
+public function exportVisitsPdf(Request $request)
+{
+    [$from, $to] = $this->dateRange($request);
+
+    $baseQuery = Visit::whereDate('visited_at', '>=', $from)
+        ->whereDate('visited_at', '<=', $to);
+
+    $totalVisits = (clone $baseQuery)->count();
+
+    $byDistributor = (clone $baseQuery)
+        ->with('distributor')
+        ->get()
+        ->groupBy('distributor_id')
+        ->map(function ($visits) {
+            return [
+                'name' => $visits->first()->distributor?->name ?? 'N/A',
+                'visits' => $visits->count(),
+            ];
+        });
+
+    $companyName = auth()->user()->company?->name ?? 'SalesConnect';
+
+    $pdf = Pdf::loadView('admin.reports.pdf.visits', compact(
+        'totalVisits', 'byDistributor', 'from', 'to', 'companyName'
+    ));
+
+    return $pdf->download("visit-report-{$from}-to-{$to}.pdf");
+}
+
+public function exportOrdersPdf(Request $request)
+{
+    [$from, $to] = $this->dateRange($request);
+
+    $baseQuery = Order::whereDate('created_at', '>=', $from)
+        ->whereDate('created_at', '<=', $to);
+
+    $pending = (clone $baseQuery)->where('status', 'pending')->count();
+    $delivered = (clone $baseQuery)->where('status', 'delivered')->count();
+    $cancelled = (clone $baseQuery)->where('status', 'cancelled')->count();
+
+    $orders = (clone $baseQuery)->with(['shop', 'distributor'])
+        ->orderBy('id', 'asc')
+        ->get();
+
+    $companyName = auth()->user()->company?->name ?? 'SalesConnect';
+
+    $pdf = Pdf::loadView('admin.reports.pdf.orders', compact(
+        'pending', 'delivered', 'cancelled', 'orders', 'from', 'to', 'companyName'
+    ));
+
+    return $pdf->download("order-report-{$from}-to-{$to}.pdf");
+}
+
 }

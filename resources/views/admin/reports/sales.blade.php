@@ -15,9 +15,14 @@
                 <label class="form-label small">To</label>
                 <input type="date" name="date_to" value="{{ $to }}" class="form-control form-control-sm">
             </div>
-            <div class="col-12 col-md-2">
-                <button type="submit" class="btn btn-sm btn-primary w-100">Filter</button>
-            </div>
+           <div class="col-12 col-md-2">
+    <button type="submit" class="btn btn-sm btn-primary w-100">Filter</button>
+</div>
+<div class="col-12 col-md-2">
+    <a href="{{ route('admin.reports.sales.export', ['date_from' => $from, 'date_to' => $to]) }}" class="btn btn-sm btn-outline-danger w-100">
+        <i class="bi bi-file-earmark-pdf"></i> Export PDF
+    </a>
+</div>
         </div>
     </form>
 

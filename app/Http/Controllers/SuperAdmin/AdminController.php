@@ -122,14 +122,13 @@ class AdminController extends Controller
 
    public function toggleStatus(User $admin): RedirectResponse
 {
-    $admin->update([
-        'status' => $admin->status === 'active' ? 'inactive' : 'active',
-    ]);
+    $newStatus = $admin->status === 'active' ? 'inactive' : 'active';
 
-    ActivityLog::record(
-        'admin_status_changed',
-        "Changed status of \"{$admin->name}\" ({$admin->email}) to {$admin->status}."
-    );
+    $admin->update(['status' => $newStatus]);
+
+    // Suspending the Admin suspends their entire company —
+    // this automatically blocks that company's Distributors and Shopkeepers too.
+    $admin->company?->update(['status' => $newStatus]);
 
     return redirect()
         ->route('super-admin.admins.index')
