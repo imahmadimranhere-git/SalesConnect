@@ -144,6 +144,7 @@ Route::middleware(['auth', 'role:shopkeeper'])->prefix('shopkeeper')->name('shop
     Route::get('products', [ShopkeeperProductController::class, 'index'])->name('products.index');
     Route::get('orders', [ShopkeeperOrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [ShopkeeperOrderController::class, 'show'])->name('orders.show');
+    Route::get('orders/{order}/download-pdf', [ShopkeeperOrderController::class, 'downloadPdf'])->name('orders.download-pdf');
     Route::get('visits', [ShopkeeperVisitController::class, 'index'])->name('visits.index');
     Route::get('profile', [ShopkeeperProfileController::class, 'show'])->name('profile.show');
 });

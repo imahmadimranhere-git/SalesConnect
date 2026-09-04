@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use App\Models\ShopAssignment;
 
 class OrderController extends Controller
 {
@@ -24,13 +25,20 @@ class OrderController extends Controller
         return view('distributor.orders.index', compact('orders'));
     }
 
-    public function create(): View
-    {
-        $shops = Shop::orderBy('name')->get(['id', 'name', 'area']);
-        $products = Product::where('status', 'active')->orderBy('name')->get(['id', 'name', 'price', 'stock_quantity']);
+   public function create(): View
+{
+    $assignedShopIds = ShopAssignment::where('distributor_id', auth()->id())
+        ->pluck('shop_id')
+        ->unique();
 
-        return view('distributor.orders.create', compact('shops', 'products'));
-    }
+    $shops = Shop::whereIn('id', $assignedShopIds)
+        ->orderBy('name')
+        ->get(['id', 'name', 'area']);
+
+    $products = Product::where('status', 'active')->orderBy('name')->get(['id', 'name', 'price', 'stock_quantity']);
+
+    return view('distributor.orders.create', compact('shops', 'products'));
+}
 
     public function store(Request $request): RedirectResponse
     {

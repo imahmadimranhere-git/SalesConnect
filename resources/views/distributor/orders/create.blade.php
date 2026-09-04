@@ -18,6 +18,13 @@
                 @endforeach
             </select>
             @error('shop_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+            @if ($shops->isEmpty())
+                <div class="alert alert-warning mt-2">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    You don't have any assigned shops yet. Please contact your Admin.
+                </div>
+            @endif
         </div>
 
         <hr>

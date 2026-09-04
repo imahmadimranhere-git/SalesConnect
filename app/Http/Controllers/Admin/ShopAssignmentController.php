@@ -26,7 +26,15 @@ class ShopAssignmentController extends Controller
             ->get()
             ->groupBy('day_of_week');
 
-        $shops = Shop::orderBy('name')->get(['id', 'name', 'area']);
+        // Shop IDs already assigned to OTHER distributors — these must be excluded
+        // from the dropdown, since each shop belongs exclusively to one distributor.
+        $shopIdsTakenByOthers = ShopAssignment::where('distributor_id', '!=', $distributor->id)
+            ->pluck('shop_id')
+            ->unique();
+
+        $shops = Shop::orderBy('name')
+            ->whereNotIn('id', $shopIdsTakenByOthers)
+            ->get(['id', 'name', 'area']);
 
         // Work out the next available visit order for each day (max existing + 1).
         $nextOrderByDay = [];
@@ -48,6 +56,18 @@ class ShopAssignmentController extends Controller
         abort_if($distributor->company_id !== auth()->user()->company_id || $distributor->role !== 'distributor', 404);
 
         $validated = $request->validated();
+
+        // Exclusivity check: this shop must not already belong to a DIFFERENT distributor.
+        $existingAssignment = ShopAssignment::where('shop_id', $validated['shop_id'])
+            ->where('distributor_id', '!=', $distributor->id)
+            ->with('distributor')
+            ->first();
+
+        if ($existingAssignment) {
+            $otherName = $existingAssignment->distributor?->name ?? 'another distributor';
+
+            return back()->with('error', "This shop is already assigned to {$otherName}. Remove it from their route first.");
+        }
 
         $alreadyExists = ShopAssignment::where('distributor_id', $distributor->id)
             ->where('shop_id', $validated['shop_id'])

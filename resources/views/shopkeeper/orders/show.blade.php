@@ -18,6 +18,11 @@
             <span class="badge {{ $order->status === 'delivered' ? 'bg-success' : ($order->status === 'cancelled' ? 'bg-danger' : 'bg-warning') }}">
                 {{ ucfirst($order->status) }}
             </span>
+            <div class="mt-2">
+                <a href="{{ route('shopkeeper.orders.download-pdf', $order) }}" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-file-earmark-pdf"></i> Download PDF
+                </a>
+            </div>
         </div>
     </div>
 
